@@ -109,6 +109,8 @@ export default function App() {
   const [exportMenuOpen, setExportMenuOpen] = useState(false);
   const [activeCardIdx, setActiveCardIdx] = useState(0);
   const [language, setLanguage] = useState("sk");
+  const [cardLayout, setCardLayout] = useState("carousel");
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   const api = (params, msgs) => callAPI({ ...params, language }, msgs);
 
@@ -793,23 +795,24 @@ export default function App() {
 
             {openChatKeys.length > 0 && (
               <div style={{ marginTop: 28 }}>
-                <div className="crsl-wrap">
+                <div className="crsl-wrap" style={cardLayout === "list" ? { display: "flex", flexDirection: "column", minHeight: "auto", perspective: "none" } : {}}>
                   {openChatKeys.map((key, idx) => {
                     const offset = idx - safeActiveIdx;
-                    const isActive = offset === 0;
+                    const isActive = cardLayout === "list" ? true : offset === 0;
                     const l = LEVEL_MAP[key]; const chat = colorChats[key];
                     const isLoading = colorLoading[key]; const isSel = !!selected[key];
                     const levelIdx = LEVELS.findIndex(lv => lv.key === key);
                     const prevClr = levelIdx > 0 ? LEVELS[levelIdx - 1].clr : null;
                     const nextClr = levelIdx < LEVELS.length - 1 ? LEVELS[levelIdx + 1].clr : null;
                     let transform, zIdx, opacity, flt;
-                    if (offset === 0) { transform = "translateX(0) scale(1) rotateY(0deg)"; zIdx = 3; opacity = 1; flt = "none"; }
+                    if (cardLayout === "list") { transform = "none"; zIdx = 1; opacity = 1; flt = "none"; }
+                    else if (offset === 0) { transform = "translateX(0) scale(1) rotateY(0deg)"; zIdx = 3; opacity = 1; flt = "none"; }
                     else if (offset === -1) { transform = "translateX(-60%) scale(0.74) rotateY(22deg)"; zIdx = 2; opacity = 0.82; flt = "none"; }
                     else if (offset === 1) { transform = "translateX(60%) scale(0.74) rotateY(-22deg)"; zIdx = 2; opacity = 0.82; flt = "none"; }
                     else if (offset < -1) { transform = "translateX(-88%) scale(0.48) rotateY(38deg)"; zIdx = 1; opacity = 0; flt = "blur(2px)"; }
                     else { transform = "translateX(88%) scale(0.48) rotateY(-38deg)"; zIdx = 1; opacity = 0; flt = "blur(2px)"; }
                     return (
-                      <div key={key} className={"crsl-card" + (!isActive ? " is-side" : "")} onClick={!isActive ? () => setActiveCardIdx(idx) : undefined} style={{ transform, zIndex: zIdx, opacity, filter: flt, pointerEvents: Math.abs(offset) > 1 ? "none" : "auto" }}>
+                      <div key={key} className={cardLayout === "list" ? "" : ("crsl-card" + (!isActive ? " is-side" : ""))} onClick={!isActive ? () => setActiveCardIdx(idx) : undefined} style={cardLayout === "list" ? { position: "relative", marginBottom: 12 } : { transform, zIndex: zIdx, opacity, filter: flt, pointerEvents: Math.abs(offset) > 1 ? "none" : "auto" }}>
                         <div style={{ display: "flex" }}>
                           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: 24, flexShrink: 0, paddingLeft: 6 }}>
                             <div style={{ width: 8, height: 8, borderRadius: "50%", background: l.clr, opacity: .7, flexShrink: 0 }} />
@@ -859,7 +862,7 @@ export default function App() {
                     );
                   })}
                 </div>
-                {openChatKeys.length > 1 && (
+                {cardLayout === "carousel" && openChatKeys.length > 1 && (
                   <div className="crsl-nav">
                     <button className="crsl-btn" onClick={() => setActiveCardIdx(i => Math.max(0, i - 1))} disabled={safeActiveIdx === 0}>← Predch.</button>
                     <div className="crsl-dots">
@@ -953,6 +956,31 @@ export default function App() {
               </div>
             </div>
             <div className="ft">Each perspective is authentic {"·"} None is better or worse</div>
+            <div style={{ textAlign: "center", margin: "18px 0 4px" }}>
+              <button onClick={() => setSettingsOpen(s => !s)} style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.35)", fontFamily: "DM Sans,sans-serif", fontSize: 10, letterSpacing: "0.14em", textTransform: "uppercase", display: "inline-flex", alignItems: "center", gap: 5, padding: "4px 8px", transition: "color 0.2s" }} onMouseEnter={e => e.currentTarget.style.color = "rgba(255,255,255,0.65)"} onMouseLeave={e => e.currentTarget.style.color = "rgba(255,255,255,0.35)"}>
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                NASTAVENIA {settingsOpen ? "▲" : "▼"}
+              </button>
+              {settingsOpen && (
+                <div style={{ maxWidth: 400, margin: "10px auto 0", padding: "16px 20px", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 10, display: "flex", flexDirection: "column", gap: 12 }}>
+                  {[
+                    { label: "ZOBRAZENIE:", opts: [{ v: "icons", l: "IKONY" }, { v: "mandala", l: "ŠPIRÁĽA" }], val: viewMode, set: setViewMode },
+                    { label: "ROZLOŽENIE KARIET:", opts: [{ v: "carousel", l: "KARUSEL" }, { v: "list", l: "ZOZNAM" }], val: cardLayout, set: setCardLayout },
+                    { label: "JAZYK:", opts: [{ v: "sk", l: "SK" }, { v: "en", l: "EN" }], val: language, set: setLanguage },
+                  ].map(({ label, opts, val, set }) => (
+                    <div key={label} style={{ display: "flex", alignItems: "center", gap: 10, justifyContent: "center" }}>
+                      <span style={{ fontFamily: "DM Sans,sans-serif", fontSize: 10, letterSpacing: "0.12em", color: "rgba(255,255,255,0.4)", textTransform: "uppercase", minWidth: 130, textAlign: "right" }}>{label}</span>
+                      <div style={{ display: "flex", gap: 4 }}>
+                        {opts.map(o => (
+                          <button key={o.v} onClick={() => set(o.v)} style={{ padding: "4px 12px", borderRadius: 4, border: val === o.v ? "1px solid rgba(250,204,21,0.5)" : "1px solid rgba(255,255,255,0.12)", background: val === o.v ? "rgba(250,204,21,0.1)" : "transparent", color: val === o.v ? "rgba(250,204,21,0.9)" : "rgba(255,255,255,0.4)", cursor: "pointer", fontFamily: "DM Sans,sans-serif", fontSize: 11, letterSpacing: "0.08em", transition: "all 0.2s" }}>{o.l}</button>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                  <button onClick={() => setSettingsOpen(false)} style={{ alignSelf: "center", marginTop: 4, padding: "6px 24px", borderRadius: 6, border: "1px solid rgba(250,204,21,0.3)", background: "rgba(250,204,21,0.08)", color: "rgba(250,204,21,0.8)", cursor: "pointer", fontFamily: "DM Sans,sans-serif", fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", transition: "all 0.2s" }}>POUŽIŤ</button>
+                </div>
+              )}
+            </div>
             <div style={{ textAlign: "center", marginTop: 20, display: "flex", justifyContent: "center", gap: 12 }}>
               <button id="tut-feat-newtopic" className="btn" onClick={() => { setTopicSet(""); setTopic(""); }} style={{ fontSize: 11, padding: "8px 24px", margin: 0 }}>Nová téma</button>
               {openChatKeys.length > 0 && (
