@@ -601,15 +601,13 @@ export default function App() {
       `}</style>
       <div className="bg" />
       <div className="wrap">
-        <div style={{ textAlign: "center", marginBottom: 0 }}><img src={TITLE_IMG} alt="Spiral Dynamics Lens" style={{ width: "min(228px, 42vw)", height: "auto", display: "block", margin: "0 auto" }} /></div>
+        <div style={{ textAlign: "center", marginBottom: 0 }}><img src={TITLE_IMG} alt="Spiral Dynamics Lens" style={{ width: "min(320px, 60vw)", height: "auto", display: "block", margin: "0 auto" }} /></div>
         <p className="sub">Viacúrovňový pohľad na realitu</p>
 
         {!topicSet ? (
           <div style={{ maxWidth: 600, margin: "0 auto" }}>
-            {/* Wider container so buttons sit further from mandala centre */}
-            <div style={{ position: "relative", width: "min(460px, 94vw)", margin: "0 auto 28px", display: "flex", justifyContent: "center" }}>
-              <SpiralMandalaCore size="min(240px, 50vw)" mode="single" style={{ opacity: 0.9 }} />
-              <button id="tut-manual-btn" onClick={() => setTutorialOpen(true)} style={{ position: "absolute", top: 8, left: 0, zIndex: 100, display: "flex", alignItems: "center", gap: 5, background: "rgba(0,0,0,0.45)", backdropFilter: "blur(6px)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 4, padding: "4px 8px", color: "rgba(255,255,255,0.45)", fontFamily: "DM Sans,sans-serif", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", cursor: "pointer", transition: "all 0.2s" }}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "min(460px, 94vw)", margin: "0 auto 24px" }}>
+              <button id="tut-manual-btn" onClick={() => setTutorialOpen(true)} style={{ display: "flex", alignItems: "center", gap: 5, background: "rgba(0,0,0,0.45)", backdropFilter: "blur(6px)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 4, padding: "4px 8px", color: "rgba(255,255,255,0.45)", fontFamily: "DM Sans,sans-serif", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", cursor: "pointer", transition: "all 0.2s" }}
                 onMouseEnter={e => { e.currentTarget.style.color="rgba(255,255,255,0.82)"; e.currentTarget.style.background="rgba(0,0,0,0.65)"; }}
                 onMouseLeave={e => { e.currentTarget.style.color="rgba(255,255,255,0.45)"; e.currentTarget.style.background="rgba(0,0,0,0.45)"; }}>
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -617,7 +615,7 @@ export default function App() {
                 </svg>
                 Tutorial
               </button>
-              <GuideButton guide={guide} style={{ top: 8, right: 0, zIndex: 100 }} tipSide="right" />
+              <GuideButton guide={guide} tipSide="right" />
             </div>
             <div style={{ position: "relative" }}>
               <textarea id="tut-textarea" value={topic} onChange={e => setTopic(e.target.value)} onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); startAnalysis(); } }} placeholder="Enter a topic, problem, question, or situation..." />
