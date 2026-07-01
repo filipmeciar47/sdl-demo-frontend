@@ -1370,14 +1370,16 @@ module.exports = async function handler(req, res) {
 
   res.setHeader("Access-Control-Allow-Origin", "*");
 
-  const { level, task, levels, messages } = req.body || {};
+  const { level, task, levels, messages, language } = req.body || {};
   if (!messages || !Array.isArray(messages)) {
     return res.status(400).json({ error: "Missing required field: messages" });
   }
-  const activeSelector = buildActiveSelector(task, level, levels);
-  if (!activeSelector) {
+  const baseSelector = buildActiveSelector(task, level, levels);
+  if (!baseSelector) {
     return res.status(400).json({ error: "Missing required field: level or task" });
   }
+  const langInstruction = language === "en" ? "\nWrite in English." : "\nPíš v slovenčine.";
+  const activeSelector = baseSelector + langInstruction;
 
   try {
     const systemContent = [

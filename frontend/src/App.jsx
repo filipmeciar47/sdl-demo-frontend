@@ -108,6 +108,9 @@ export default function App() {
   const importFileRef = useRef(null);
   const [exportMenuOpen, setExportMenuOpen] = useState(false);
   const [activeCardIdx, setActiveCardIdx] = useState(0);
+  const [language, setLanguage] = useState("sk");
+
+  const api = (params, msgs) => callAPI({ ...params, language }, msgs);
 
   function scrollToChat(key) {
     const idx = Object.keys(colorChats).indexOf(key);
@@ -154,7 +157,7 @@ export default function App() {
   function fetchIntegrated(levels) {
     const levelNames = levels.map(l => l.name).join(", ");
     const levelKeys = levels.map(l => l.key);
-    callAPI({ task: "integrated", levels: levelKeys }, [{ role: "user", content: "Téma: \"" + topicSet + "\"\n\nAnalyzuj túto tému z pohľadu úrovní: " + levelNames }])
+    api({ task: "integrated", levels: levelKeys }, [{ role: "user", content: "Téma: \"" + topicSet + "\"\n\nAnalyzuj túto tému z pohľadu úrovní: " + levelNames }])
       .then(reply => {
         levelKeys.forEach(key => {
           const marker = "[" + key.toUpperCase() + "]";
@@ -195,7 +198,7 @@ export default function App() {
 
   function fetchInitial(key) {
     setColorLoading(prev => ({ ...prev, [key]: true }));
-    callAPI({ level: key }, [{ role: "user", content: "Téma: \"" + topicSet + "\"\n\nPoskyni stručnú úvodnú perspektívu na túto tému z pohľadu tejto úrovne. MAX 2-3 vety. Buď konkrétny a výstižný." }])
+    api({ level: key }, [{ role: "user", content: "Téma: \"" + topicSet + "\"\n\nPoskyni stručnú úvodnú perspektívu na túto tému z pohľadu tejto úrovne. MAX 2-3 vety. Buď konkrétny a výstižný." }])
       .then(reply => setColorChats(prev => prev[key] ? { ...prev, [key]: { ...prev[key], messages: [{ role: "assistant", content: reply }] } } : prev))
       .catch(err => setColorChats(prev => prev[key] ? { ...prev, [key]: { ...prev[key], messages: [{ role: "error", content: err.message || "Nepodarilo sa načítať perspektívu." }] } } : prev))
       .finally(() => setColorLoading(prev => ({ ...prev, [key]: false })));
@@ -208,7 +211,7 @@ export default function App() {
     setColorChats(prev => ({ ...prev, [key]: { ...prev[key], elaborated: true } }));
     const msgs = [...chat.messages, { role: "user", content: "Rozviň túto perspektívu podrobnejšie. Vysvetli hlbšie, prečo táto úroveň vidí tému práve takto, aké sú jej silné stránky a kde naráža na svoje hranice. 6-10 viet." }];
     setColorChats(prev => ({ ...prev, [key]: { ...prev[key], messages: msgs } }));
-    callAPI({ level: key }, [{ role: "user", content: "Téma: \"" + topicSet + "\"" }, ...msgs])
+    api({ level: key }, [{ role: "user", content: "Téma: \"" + topicSet + "\"" }, ...msgs])
       .then(reply => setColorChats(prev => prev[key] ? { ...prev, [key]: { ...prev[key], messages: [...prev[key].messages, { role: "assistant", content: reply }] } } : prev))
       .catch(err => setColorChats(prev => prev[key] ? { ...prev, [key]: { ...prev[key], messages: [...prev[key].messages, { role: "assistant", content: "Error: " + err.message }] } } : prev))
       .finally(() => setColorLoading(prev => ({ ...prev, [key]: false })));
@@ -235,7 +238,7 @@ export default function App() {
     setColorChats(prev => ({ ...prev, [key]: { ...prev[key], messages: msgs, input: "" } }));
     setColorLoading(prev => ({ ...prev, [key]: true }));
     try {
-      const reply = await callAPI({ level: key }, [{ role: "user", content: "Topic: \"" + topicSet + "\"" }, ...msgs]);
+      const reply = await api({ level: key }, [{ role: "user", content: "Topic: \"" + topicSet + "\"" }, ...msgs]);
       setColorChats(prev => ({ ...prev, [key]: { ...prev[key], messages: [...prev[key].messages, { role: "assistant", content: reply }] } }));
     } catch (err) {
       setColorChats(prev => ({ ...prev, [key]: { ...prev[key], messages: [...prev[key].messages, { role: "assistant", content: "Error: " + err.message }] } }));
@@ -275,7 +278,7 @@ export default function App() {
     }).join("\n\n");
     try {
       const prompt = "Téma: \"" + topicSet + "\"\n\nPerspektívy na porovnanie:\n" + levelDescs + "\n\nKde vznikajú napätia a konflikty medzi týmito perspektívami pri tejto konkrétnej téme? Čo jedna vidí ako riešenie, druhá môže vnímať ako problém?";
-      const reply = await callAPI({ task: "conflicts" }, [{ role: "user", content: prompt }]);
+      const reply = await api({ task: "conflicts" }, [{ role: "user", content: prompt }]);
       setConflictResult(reply);
       setConflictHistory([{ role: "user", content: prompt }, { role: "assistant", content: reply }]);
     } catch (err) { setConflictResult("Chyba: " + err.message); }
@@ -287,7 +290,7 @@ export default function App() {
     setConflictLoading(true);
     const msgs = [...conflictHistory, { role: "user", content: "Rozviň tieto napätia hlbšie. Kde presne nastáva stret hodnôt? Aké praktické dôsledky má toto napätie v každodennom živote? Existuje spôsob, ako tieto perspektívy prepojiť bez toho, aby niektorá stratila svoju podstatu?" }];
     try {
-      const reply = await callAPI({ task: "conflictsElaborate" }, msgs);
+      const reply = await api({ task: "conflictsElaborate" }, msgs);
       setConflictResult(prev => prev + "\n\n" + reply);
       setConflictHistory(msgs.concat([{ role: "assistant", content: reply }]));
     } catch (err) { setConflictResult(prev => prev + "\n\nChyba: " + err.message); }
@@ -300,7 +303,7 @@ export default function App() {
     setConflictInput(""); setConflictLoading(true);
     const msgs = [...conflictHistory, { role: "user", content: q }];
     try {
-      const reply = await callAPI({ task: "conflictsQuestion" }, msgs);
+      const reply = await api({ task: "conflictsQuestion" }, msgs);
       setConflictResult(prev => prev + "\n\n" + q + "\n\n" + reply);
       setConflictHistory(msgs.concat([{ role: "assistant", content: reply }]));
     } catch (err) { setConflictResult(prev => prev + "\n\nChyba: " + err.message); }
@@ -321,7 +324,7 @@ export default function App() {
     const msgs = [...chat.messages, { role: "user", content: emergePrompt }];
     setColorChats(prev => ({ ...prev, [key]: { ...prev[key], messages: msgs } }));
     try {
-      const reply = await callAPI({ level: key }, [{ role: "user", content: "Topic: \"" + topicSet + "\"" }, ...msgs]);
+      const reply = await api({ level: key }, [{ role: "user", content: "Topic: \"" + topicSet + "\"" }, ...msgs]);
       setColorChats(prev => ({ ...prev, [key]: { ...prev[key], messages: [...prev[key].messages, { role: "assistant", content: reply }] } }));
     } catch (err) {
       setColorChats(prev => ({ ...prev, [key]: { ...prev[key], messages: [...prev[key].messages, { role: "assistant", content: "Error: " + err.message }] } }));
@@ -342,7 +345,7 @@ export default function App() {
     const msgs = [...chat.messages, { role: "user", content: growthPrompt }];
     setColorChats(prev => ({ ...prev, [key]: { ...prev[key], messages: msgs } }));
     try {
-      const reply = await callAPI({ level: key }, [{ role: "user", content: "Topic: \"" + topicSet + "\"" }, ...msgs]);
+      const reply = await api({ level: key }, [{ role: "user", content: "Topic: \"" + topicSet + "\"" }, ...msgs]);
       setColorChats(prev => ({ ...prev, [key]: { ...prev[key], messages: [...prev[key].messages, { role: "assistant", content: reply }] } }));
     } catch (err) {
       setColorChats(prev => ({ ...prev, [key]: { ...prev[key], messages: [...prev[key].messages, { role: "assistant", content: "Error: " + err.message }] } }));
@@ -489,7 +492,7 @@ export default function App() {
       let ctx = "Téma: \"" + topicSet + "\"";
       if (integratedContext) ctx += "\n\nIntegrované perspektívy:" + integratedContext;
       if (reflection) ctx += "\n\nVzorec explorácie: " + reflection;
-      const reply = await callAPI({ task: "main" }, [{ role: "user", content: ctx }, { role: "assistant", content: "Rozumiem. Pokračujeme." }, ...msgs]);
+      const reply = await api({ task: "main" }, [{ role: "user", content: ctx }, { role: "assistant", content: "Rozumiem. Pokračujeme." }, ...msgs]);
       setMainChat(m => [...m, { role: "assistant", content: reply }]);
     } catch (err) { setMainChat(m => [...m, { role: "assistant", content: "Chyba: " + err.message }]); }
     finally { setMainLoading(false); }
@@ -620,6 +623,10 @@ export default function App() {
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
               </button>
               <input ref={importFileRef} type="file" accept=".md" style={{ display: "none" }} onChange={e => { importAnalysis(e.target.files?.[0]); e.target.value = ""; }} />
+            </div>
+            <div style={{ display: "flex", justifyContent: "center", gap: 8, margin: "10px 0" }}>
+              <button onClick={() => setLanguage("sk")} style={{ padding: "5px 14px", borderRadius: 4, border: language === "sk" ? "1px solid rgba(250,204,21,0.6)" : "1px solid rgba(255,255,255,0.15)", background: language === "sk" ? "rgba(250,204,21,0.1)" : "transparent", color: language === "sk" ? "rgba(250,204,21,0.9)" : "rgba(255,255,255,0.35)", cursor: "pointer", fontSize: 12, letterSpacing: "0.1em", fontFamily: "DM Sans,sans-serif", transition: "all 0.2s" }}>SK</button>
+              <button onClick={() => setLanguage("en")} style={{ padding: "5px 14px", borderRadius: 4, border: language === "en" ? "1px solid rgba(250,204,21,0.6)" : "1px solid rgba(255,255,255,0.15)", background: language === "en" ? "rgba(250,204,21,0.1)" : "transparent", color: language === "en" ? "rgba(250,204,21,0.9)" : "rgba(255,255,255,0.35)", cursor: "pointer", fontSize: 12, letterSpacing: "0.1em", fontFamily: "DM Sans,sans-serif", transition: "all 0.2s" }}>EN</button>
             </div>
             <button id="tut-explore-btn" className="btn" onClick={startAnalysis} disabled={!topic.trim()}>Preskúmať</button>
           </div>
