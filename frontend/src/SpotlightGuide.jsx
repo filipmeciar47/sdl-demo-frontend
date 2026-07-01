@@ -222,9 +222,9 @@ export function GuideOverlay({ guide }) {
 }
 
 // ─── Tlačidlo sprievodcu (pridáva sa POPRI existujúcom TUTORIAL tlačidle) ────
-export function GuideButton({ guide, style, tipSide = "left", tipAbove = false }) {
+export function GuideButton({ guide, style, tipSide = "left", tipAbove = false, label = "Sprievodca", positionAbsolute = true }) {
   return (
-    <div style={{ position: "absolute", ...style }}>
+    <div style={{ position: positionAbsolute ? "absolute" : "relative", ...style }}>
       <button
         onClick={guide.start}
         style={{
@@ -243,7 +243,7 @@ export function GuideButton({ guide, style, tipSide = "left", tipAbove = false }
           <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
           <line x1="12" y1="17" x2="12.01" y2="17"/>
         </svg>
-        Sprievodca
+        {label}
       </button>
 
       {guide.showIntroTip && (

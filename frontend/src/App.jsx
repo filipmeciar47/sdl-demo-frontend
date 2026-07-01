@@ -154,6 +154,7 @@ export default function App() {
     languageLabel:       language === "en" ? "LANGUAGE:"                                                : "JAZYK:",
     applyLabel:          language === "en" ? "APPLY"                                                    : "POUŽIŤ",
     guide:               language === "en" ? "Guide"                                                    : "Sprievodca",
+    topicPlaceholder:    language === "en" ? "Enter a topic, problem, question, or situation..."        : "Zadaj tému, problém, otázku alebo situáciu...",
   };
 
   function scrollToChat(key) {
@@ -657,10 +658,10 @@ export default function App() {
                 </svg>
                 Tutorial
               </button>
-              <GuideButton guide={guide} tipSide="right" label={T.guide} />
+              <GuideButton guide={guide} tipSide="right" label={T.guide} positionAbsolute={false} />
             </div>
             <div style={{ position: "relative" }}>
-              <textarea id="tut-textarea" value={topic} onChange={e => setTopic(e.target.value)} onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); startAnalysis(); } }} placeholder="Enter a topic, problem, question, or situation..." />
+              <textarea id="tut-textarea" value={topic} onChange={e => setTopic(e.target.value)} onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); startAnalysis(); } }} placeholder={T.topicPlaceholder} />
               <button type="button" title="Pokračovať v uloženej analýze" onClick={() => importFileRef.current?.click()} style={{ position: "absolute", bottom: 10, right: 10, background: "none", border: "none", cursor: "pointer", opacity: 0.35, color: "rgba(255,255,255,0.8)", padding: 4, transition: "opacity 0.2s", lineHeight: 0 }} onMouseEnter={e => e.currentTarget.style.opacity = "1"} onMouseLeave={e => e.currentTarget.style.opacity = "0.35"}>
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
               </button>
